@@ -1,11 +1,17 @@
 # WPScan Analyzer
 
-Outil graphique tout-en-un pour scanner un site WordPress avec
-[WPScan](https://wpscan.com/) et produire un **rapport PDF** clair, sans
-connaître la ligne de commande.
+Outil graphique tout-en-un pour analyser la sécurité d'un site WordPress et
+produire un **rapport PDF** clair, sans connaître la ligne de commande.
+
+Le rapport combine plusieurs sources :
+
+- **[WPScan](https://wpscan.com/)** — vulnérabilités du cœur WordPress, du thème
+  et des extensions ;
+- **[Mozilla HTTP Observatory](https://developer.mozilla.org/observatory)** —
+  note de sécurité des en-têtes HTTP du site (A+ à F).
 
 Pensé pour les personnes qui gèrent des sites WordPress sous **Windows, macOS
-ou Linux** : on saisit son token, l'URL du site, on clique, on récupère un PDF.
+ou Linux** : on saisit l'URL du site, on clique, on récupère un PDF.
 
 ## ⚠️ Avertissement légal
 
@@ -22,16 +28,25 @@ Analyzer.
 
 ## Fonctionnement
 
-1. **Installation automatique de WPScan** *(uniquement si absent)* :
-   - utilise **Docker** s'il est disponible (image `wpscanteam/wpscan`) ;
-   - sinon installe le **gem Ruby** `wpscan`.
-2. **Saisie simple** : token WPScan, URL du site, dossier de destination
-   (le **Bureau** par défaut).
-3. **Rapport PDF** généré dans le dossier choisi : version WordPress, thème,
-   extensions, vulnérabilités connues et éléments intéressants.
+L'interface se déroule en **3 écrans** :
 
-Le token peut être mémorisé pour ne pas le ressaisir à chaque fois
-(stocké dans `~/.wpscan-analyzer/config.json`, accès restreint au compte).
+1. **Accueil** — présente les sources utilisées dans le rapport.
+2. **Configuration** — URL du site, token WPScan (facultatif), dossier de
+   destination (le **Bureau** par défaut).
+3. **Progression** — chaque étape s'affiche avec sa case d'état (préparation,
+   scan WordPress, test Observatory, génération du PDF).
+
+En coulisses :
+
+- **Installation automatique de WPScan** *(uniquement si absent)* : via
+  **Docker** (image `wpscanteam/wpscan`) s'il est disponible, sinon via le
+  **gem Ruby** `wpscan`.
+- **Le test Observatory ne nécessite aucun token** ni installation.
+- **Token WPScan facultatif** : sans token, seul le test Observatory est
+  effectué. Le token peut être mémorisé pour ne pas le ressaisir
+  (stocké dans `~/.wpscan-analyzer/config.json`, accès restreint au compte).
+- **Rapport PDF** généré dans le dossier choisi, même si une source échoue
+  (le rapport contient alors les résultats disponibles).
 
 ## Obtenir un token WPScan
 
@@ -72,9 +87,12 @@ L'exécutable est généré dans `dist/` :
 
 ## Prérequis côté utilisateur final
 
-L'exécutable embarque tout le nécessaire **sauf le moteur WPScan**. Au premier
-scan, le programme installe WPScan automatiquement. Il faut donc au moins
-**l'un** des deux éléments suivants sur la machine :
+Le **test Mozilla Observatory fonctionne sans rien installer** : l'exécutable
+seul suffit pour obtenir une note de sécurité des en-têtes HTTP.
+
+Pour bénéficier en plus de **l'analyse WordPress (WPScan)**, il faut au moins
+**l'un** des deux éléments suivants sur la machine (le programme installe
+ensuite WPScan automatiquement, uniquement s'il est absent) :
 
 - **Docker Desktop** *(recommandé)* — <https://www.docker.com/products/docker-desktop>
 - **Ruby** — <https://www.ruby-lang.org/fr/documentation/installation/>
@@ -84,11 +102,12 @@ scan, le programme installe WPScan automatiquement. Il faut donc au moins
 ```
 run.py                  Point d'entrée (lance l'interface)
 build.py                Génère l'exécutable autonome
-requirements.txt        Dépendances Python (fpdf2)
+requirements.txt        Dépendances Python (fpdf2, certifi)
 wpscan_analyzer/
-  gui.py                Fenêtre graphique (Tkinter)
+  gui.py                Interface graphique en 3 écrans (Tkinter)
   runner.py             Détection / installation / exécution de WPScan
-  report.py             Génération du rapport PDF
+  observatory.py        Test Mozilla HTTP Observatory (API publique)
+  report.py             Génération du rapport PDF combiné
   config.py             Sauvegarde du token et des préférences
 ```
 

@@ -24,7 +24,8 @@ def main() -> int:
         "--onefile",
         "--windowed",            # pas de console derrière la fenêtre
         "--name", NAME,
-        "--collect-all", "fpdf",  # embarque les polices internes de fpdf2
+        "--collect-all", "fpdf",      # polices internes de fpdf2
+        "--collect-all", "certifi",   # magasin de certificats pour les appels HTTPS
         "run.py",
     ]
     print("Construction de l'exécutable :\n  " + " ".join(cmd) + "\n")
